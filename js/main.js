@@ -3,12 +3,6 @@ class Jugador {
 		this.nombre = nombre;
 		this.dinero = dinero;
 	}
-	agregarDinero(dinero) {
-		this.dinero += dinero;
-	}
-	quitarDinero(dinero) {
-		this.dinero -= dinero;
-	}
 }
 
 function agregarJugador() {
@@ -18,15 +12,20 @@ function agregarJugador() {
 	let jugador = new Jugador(nombre, dinero);
 	jugadores.push(jugador);
 	localStorage.setItem("juego", JSON.stringify(jugadores));
+	mostrarJugadores();
+	cargarEnHistorial(`CREADO: ${nombre} con $${dinero}`);
 }
 function quitarJugador(jugador) {
-	console.log("eliminando jugador ", jugador);
 	jugadores.splice(jugadores.indexOf(jugador), 1);
 	localStorage.setItem("juego", JSON.stringify(jugadores));
+	mostrarJugadores();
+	cargarEnHistorial(`${jugador.nombre} se elimino`);
 }
 function reiniciarJuego() {
 	localStorage.setItem("juego", JSON.stringify([]));
+	localStorage.setItem("historial-monopoly", JSON.stringify([]));
 	window.location.reload();
+	cargarEnHistorial("Se reinicio el juego");
 }
 
 function mostrarJugadoresAEliminar() {
@@ -46,26 +45,85 @@ function mostrarJugadoresAEliminar() {
 	});
 }
 
+function cargarEnHistorial(jugada) {
+	const historial = JSON.parse(localStorage.getItem("historial-monopoly")) ?? [];
+	historial.unshift(jugada);
+	if (historial.length > 30) {
+		historial.pop();
+	}
+	localStorage.setItem("historial-monopoly", JSON.stringify(historial));
+	mostrarHistorial();
+}
+
+function mostrarHistorial() {
+	const historial = JSON.parse(localStorage.getItem("historial-monopoly")) ?? [];
+	document.getElementById("historial").innerHTML = "";
+	historial.forEach((jugada) => {
+		const divJugada = document.createElement("div");
+		divJugada.textContent = jugada;
+		document.getElementById("historial").appendChild(divJugada);
+	});
+}
+
+function agregarDinero(jugador, dinero) {
+	jugador.dinero += dinero;
+	cargarEnHistorial(`${jugador.nombre} se agrego +$${dinero} ahora tiene $${jugador.dinero}`);
+}
+
+function quitarDinero(jugador, dinero) {
+	jugador.dinero -= dinero;
+	cargarEnHistorial(`${jugador.nombre} se quito -$${dinero} ahora tiene $${jugador.dinero}`);
+}
+
 function mostrarJugadores() {
-    document.getElementById("jugadores").innerHTML = "";
-    jugadores.forEach((jugador) => {
-        console.log("a");
-        document.getElementById("jugadores").innerHTML += `
+	document.getElementById("jugadores").innerHTML = "";
+	jugadores.forEach((jugador) => {
+		console.log(jugador);
+		document.getElementById("jugadores").innerHTML += `
             <div class="card col-3 m-2">
                 <div class="card-body text-center">
                     <h5 class="card-title">${jugador.nombre}</h5>
                     <h6>${jugador.dinero}</h6>
-                    <input type="number" class="mb-2">
-                    <div id="botonera"></div>
-                    <div class="btn btn-success">➕</div>
-                    <div class="btn btn-danger">➖</div>
+                    <input id="input-${jugador.nombre}" type="number" class="form-control mb-2">
+                    <div id="agregar-${jugador.nombre}" class="btn btn-success btn-agregar">➕</div>
+                    <div id="quitar-${jugador.nombre}" class="btn btn-danger btn-quitar">➖</div>
                 </div>
             </div>`;
-    });
+	});
+	//	recorrer todos los btn-agregar y agregarles un escuchador de click
+	const botonesAgregar = document.getElementsByClassName("btn-agregar");
+	for (let i = 0; i < botonesAgregar.length; i++) {
+		botonesAgregar[i].addEventListener("click", (e) => {
+			const jugador = jugadores.find(
+				(jugador) => jugador.nombre == e.target.id.split("-")[1]
+			);
+			const dinero = Number(
+				document.getElementById(`input-${jugador.nombre}`).value
+			);
+			agregarDinero(jugador, dinero);
+			localStorage.setItem("juego", JSON.stringify(jugadores));
+			mostrarJugadores();
+		});
+	}
+	const botonesQuitar = document.getElementsByClassName("btn-quitar");
+	for (let i = 0; i < botonesAgregar.length; i++) {
+		botonesQuitar[i].addEventListener("click", (e) => {
+			const jugador = jugadores.find(
+				(jugador) => jugador.nombre == e.target.id.split("-")[1]
+			);
+			const dinero = Number(
+				document.getElementById(`input-${jugador.nombre}`).value
+			);
+			quitarDinero(jugador, dinero);
+			localStorage.setItem("juego", JSON.stringify(jugadores));
+			mostrarJugadores();
+		});
+	}
 }
 
 const jugadores = JSON.parse(localStorage.getItem("juego")) ?? [];
 mostrarJugadores();
+mostrarHistorial();
 
 const btnAgregarJugador = document.getElementById("agregar-jugador");
 btnAgregarJugador.addEventListener("click", agregarJugador);
