@@ -36,10 +36,24 @@ function quitarJugador(jugador) {
 	cargarEnHistorial(`${jugador.nombre} se elimino`);
 }
 function reiniciarJuego() {
-	localStorage.setItem("juego", JSON.stringify([]));
-	localStorage.setItem("historial-monopoly", JSON.stringify([]));
-	window.location.reload();
-	cargarEnHistorial("Se reinicio el juego");
+	Swal.fire({
+		title: "Reiniciar Juego",
+		text: "Esta seguro que quiere reiniciar el juego?",
+		icon: "error",
+		showCancelButton: true,
+		confirmButtonColor: "#198754",
+		cancelButtonColor: "#dc3545",
+		confirmButtonText: "Si, reiniciar!",
+		cancelButtonText: "No, cancelar!",
+	}).then((result) => {
+		if (result.isConfirmed) {
+			console.log("reiniciar");
+			jugadores = [];
+			localStorage.setItem("juego", JSON.stringify([]));
+			cargarEnHistorial("Juego reiniciado");
+			mostrarJugadores();
+		}
+	});
 }
 
 function mostrarJugadoresAEliminar() {
@@ -135,7 +149,7 @@ function mostrarJugadores() {
 	}
 }
 
-const jugadores = JSON.parse(localStorage.getItem("juego")) ?? [];
+let jugadores = JSON.parse(localStorage.getItem("juego")) ?? [];
 mostrarJugadores();
 mostrarHistorial();
 
