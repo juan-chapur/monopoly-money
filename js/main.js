@@ -10,10 +10,24 @@ function agregarJugador() {
 	document.getElementById("agregar-jugador-nombre").value = "";
 	let dinero = Number(document.getElementById("agregar-jugador-dinero").value);
 	let jugador = new Jugador(nombre, dinero);
-	jugadores.push(jugador);
-	localStorage.setItem("juego", JSON.stringify(jugadores));
-	mostrarJugadores();
-	cargarEnHistorial(`CREADO: ${nombre} con $${dinero}`);
+	//	ver si existe el jugador en el array de jugadores y agregarlo, sino mostrar un sweetalert de que ya esta creado
+	if (jugadores.find((j) => j.nombre === jugador.nombre)) {
+		Swal.fire({
+			title: "Jugador ya existe",
+			text: "El jugador ya existe",
+			icon: "warning",
+		});
+	} else {
+		Swal.fire({
+			title: "Jugador Creado",
+			text: `Jugador ${jugador.nombre} creado con $${jugador.dinero}`,
+			icon: "success",
+		});
+		jugadores.push(jugador);
+		localStorage.setItem("juego", JSON.stringify(jugadores));
+		mostrarJugadores();
+		cargarEnHistorial(`CREADO: ${nombre} con $${dinero}`);
+	}
 }
 function quitarJugador(jugador) {
 	jugadores.splice(jugadores.indexOf(jugador), 1);
