@@ -80,7 +80,7 @@ function mostrarJugadores() {
 	jugadores.forEach((jugador) => {
 		console.log(jugador);
 		document.getElementById("jugadores").innerHTML += `
-            <div class="card col-3 m-2">
+            <div class="card col-5 col-md-3 col-lg-2 m-2">
                 <div class="card-body text-center">
                     <h5 class="card-title">${jugador.nombre}</h5>
                     <h6>${jugador.dinero}</h6>
